@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>A Simple Game Engine</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <style>
+    .game-ball{
+    	position: absolute;
+    	height:50px;
+    	width:50px;
+    	background-color: purple;
+    	border-radius: 25px;
+    }
+
+    #game-board{
+    	position: relative;
+    	background-color: black;
+    	height: 600px;
+    	width: 800px;
+    }
+    </style>
+  </head>
+  <body>
+
+  <div id="game-board"></div>
+           
+  </body>
+</html>
+<script>
+/*
+Discuss the mechanics of the game engine
+- it manages the game objects
+- update() repositions them based on their velocity,direction,user actions, etc.
+- game loop - calls update() repeatedly
+- A form of MVC?
+- Using the DOM is different than using the canvas
+
+1. Explain initial code
+	- GameObject (and it's methods)
+	- Global variables 
+2. In setUp(), replace call to update() with timer
+3. In update(), add check to reverse the direction of the balls
+4. In setup() add keypress listener
+5. add hitDetection (2 places - function declaration and if statement which invokes it in update)
+*/
+
+// variables that we'll use for this game
+var timer;
+var gameBoard = document.getElementById("game-board");
+var gameBoardWidth = parseInt(getComputedStyle(gameBoard).width);
+var gameBoardHeight = parseInt(getComputedStyle(gameBoard).height);
+var player;
+var balls = [];
+
+// when the page loads, run the setup function
+window.addEventListener("load", setupGame);
+
+// this function creates the initial game objects and
+// then starts the game loop
+function setupGame(){
+	// create the game objects and add them to the game objects array
+	balls.push(new GameObject(10,10,"red", 25, 5));
+	balls.push(new GameObject(200,200,"red",100, 10));
+	balls.push(new GameObject(600,400,"red",50, 10));
+	balls.push(new GameObject(500,500,"red",80, 10));
+	
+	player = new GameObject(gameBoardWidth/2,gameBoardHeight/2,"blue", 15, 0);
+	/*
+	window.addEventListener('keypress', function(event){
+		switch(event.keyCode){
+			case 39: // right arrow
+				player.posX += 5;
+				break;
+			case 37: // left arrow
+				player.posX -= 5;
+				break;
+			case 38: // up arrow
+				player.posY -= 5;
+				break;
+			case 40: // down arrow
+				player.posY += 5;
+				break;
+		}
+	});
+	*/
+
+	// start the game loop
+	//timer = setInterval(update,10);
+	update();
+}
+
+// this is our game loop function, it will loop
+// through all the game objects and reposition them based on their velocity
+function update(){
+
+	player.draw(gameBoard);
+
+	// loop through all the game objects and update their position based on their velocity
+	for(var x = 0; x < balls.length; x++){
+		
+		var obj = balls[x];
+		
+		/*		
+		// if the object hits either end of the gameboard, then
+		// reverse it's velocity
+		if(obj.posX >= gameBoardWidth || obj.posX <= 0){
+			obj.velocity *= -1;
+		}
+		*/
+		
+		// set the new position of the obj
+		obj.posX += obj.velocity;
+
+		obj.draw(gameBoard);
+
+		/*
+		if(hitDetect(player, obj)){
+			gameBoard.removeChild(obj.div);
+			balls.splice(x,1);
+		}
+		*/
+
+	}
+}
+
+/*
+function hitDetect(obj1, obj2){
+	//calculate the distance between 2 points
+	var distX = Math.abs(obj1.posX - obj2.posX);
+	var distY = Math.abs(obj1.posY - obj2.posY);
+	var distTotal = Math.sqrt(distX*distX + distY*distY);
+	if(distTotal <= Math.abs(obj1.offset) + Math.abs(obj2.offset)){
+		return true;
+	}
+	return false;
+}
+*/
+
+function GameObject(posX, posY, color, size, velocity){
+	
+	this.posX = posX;
+	this.posY = posY;
+	this.color = color;
+	this.velocity = velocity;
+	this.size = size;
+	
+	this.offset = size/2;
+	this.hitColor = null;
+
+	this.div = this.createDiv(this.color,this.size);
+}
+
+GameObject.prototype.createDiv = function(color, size){
+	var div = document.createElement("div");
+	div.setAttribute("class", "game-ball");
+	div.style.backgroundColor = color;
+	div.style.width = size + "px";
+	div.style.height = size + "px";
+	div.style.borderRadius = (size/2) + "px";
+	return div;
+}
+
+GameObject.prototype.draw = function(container){
+	container.appendChild(this.div);
+	this.div.style.left = (this.posX - this.offset) + "px";
+	this.div.style.top = (this.posY - this.offset) + "px";
+};
+
+
+</script>
